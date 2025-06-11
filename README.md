@@ -79,14 +79,9 @@ npm install
 Crea un archivo `.env.local` en la raíz del proyecto:
 
 ```env
-# OpenAI API Key para el chatbot
-NEXT_PUBLIC_OPENAI_API_KEY=tu_clave_api_aqui
-
 # Otras variables de configuración (opcional)
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ```
-
-> ⚠️ **Importante**: Para que el chatbot funcione correctamente, necesitas obtener una API key de OpenAI desde [platform.openai.com](https://platform.openai.com/)
 
 ### 4. Ejecutar en Modo Desarrollo
 
@@ -191,7 +186,6 @@ npm run start
 - Modifica `tailwind.config.ts` para configuraciones globales
 - Usa `app/globals.css` para estilos personalizados
 - Componentes UI en `components/ui/` siguen el patrón shadcn/ui
-
 
 ## 🤝 Contribución
 
