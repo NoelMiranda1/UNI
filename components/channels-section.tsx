@@ -2,8 +2,6 @@
 
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { 
-  ChevronDown, 
-  ChevronRight,
   Youtube,
   Video,
   Newspaper,
@@ -109,7 +107,7 @@ export function ChannelsSection() {
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetContent 
         side="left" 
-        className="w-80 p-0 bg-white [&_[data-radix-sheet-overlay]]:bg-black/20"
+        className="w-80 p-0 bg-white [&_[data-radix-sheet-overlay]]:bg-black/20 [&_[data-radix-sheet-close]]:text-white"
       >
         <div className="flex flex-col h-full">
           <div className="p-6 bg-primary-dark text-white">

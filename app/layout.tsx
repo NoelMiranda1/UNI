@@ -5,7 +5,6 @@ import { Navbar } from '@/components/navbar';
 import { SocialBar } from '@/components/social-bar';
 import { Footer } from '@/components/footer';
 import { Chatbot } from '@/components/chatbot';
-import { ChannelsSection } from '@/components/channels-section';
 
 const inter = InterFont({ 
   subsets: ['latin'],

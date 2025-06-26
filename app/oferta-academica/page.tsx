@@ -1,196 +1,80 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Code2, Building2, Cpu, Wrench, Factory, Waves, Database, Network, Radio, TreePine, HardHat, Lightbulb, PenTool, Leaf, FlaskRound as Flask, Cog } from "lucide-react";
+import { ChevronRight, Cog, Loader2 } from "lucide-react";
 import Link from "next/link";
-
-interface Area {
-  id: string;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  image: string;
-  careers: Career[];
-}
-
-interface Career {
-  id: number;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  image: string;
-  duration: string;
-  credits: number;
-}
-
-const academicAreas: Area[] = [
-  {
-    id: "tecnologia",
-    title: "Tecnología e Informática",
-    description: "Carreras enfocadas en el desarrollo tecnológico y sistemas de información",
-    icon: <Cog className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg",
-    careers: [
-      {
-        id: 1,
-        title: "Ingeniería en Computación",
-        description: "Desarrollo de software, sistemas computacionales y tecnologías de la información.",
-        icon: <Code2 className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg",
-        duration: "5 años",
-        credits: 250
-      },
-      {
-        id: 8,
-        title: "Ingeniería en Sistemas",
-        description: "Desarrollo de sistemas de información y gestión tecnológica.",
-        icon: <Database className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/1181467/pexels-photo-1181467.jpeg",
-        duration: "5 años",
-        credits: 245
-      },
-      {
-        id: 9,
-        title: "Ingeniería en Telecomunicaciones",
-        description: "Redes de comunicación y sistemas de transmisión.",
-        icon: <Network className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/2422293/pexels-photo-2422293.jpeg",
-        duration: "5 años",
-        credits: 248
-      }
-    ]
-  },
-  {
-    id: "industrial",
-    title: "Ingeniería Industrial y Manufactura",
-    description: "Carreras orientadas a la optimización de procesos y producción industrial",
-    icon: <Factory className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg",
-    careers: [
-      {
-        id: 4,
-        title: "Ingeniería Mecánica",
-        description: "Diseño y mantenimiento de sistemas mecánicos y térmicos.",
-        icon: <Wrench className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/3862632/pexels-photo-3862632.jpeg",
-        duration: "5 años",
-        credits: 248
-      },
-      {
-        id: 5,
-        title: "Ingeniería Industrial",
-        description: "Optimización de procesos y gestión de la producción.",
-        icon: <Factory className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/1108101/pexels-photo-1108101.jpeg",
-        duration: "5 años",
-        credits: 252
-      },
-      {
-        id: 13,
-        title: "Ingeniería en Diseño Industrial",
-        description: "Diseño de productos y procesos industriales.",
-        icon: <PenTool className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/3862130/pexels-photo-3862130.jpeg",
-        duration: "5 años",
-        credits: 248
-      }
-    ]
-  },
-  {
-    id: "construccion",
-    title: "Construcción y Arquitectura",
-    description: "Carreras enfocadas en el diseño y construcción de infraestructura",
-    icon: <Building2 className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/157811/pexels-photo-157811.jpeg",
-    careers: [
-      {
-        id: 2,
-        title: "Arquitectura",
-        description: "Diseño arquitectónico, urbanismo y planificación de espacios.",
-        icon: <Building2 className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/157811/pexels-photo-157811.jpeg",
-        duration: "5 años",
-        credits: 255
-      },
-      {
-        id: 6,
-        title: "Ingeniería Civil",
-        description: "Diseño y construcción de infraestructura y obras civiles.",
-        icon: <HardHat className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/159306/construction-site-build-construction-work-159306.jpeg",
-        duration: "5 años",
-        credits: 255
-      }
-    ]
-  },
-  {
-    id: "energia",
-    title: "Energía y Electricidad",
-    description: "Carreras relacionadas con sistemas eléctricos y energías renovables",
-    icon: <Lightbulb className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg",
-    careers: [
-      {
-        id: 3,
-        title: "Ingeniería Electrónica",
-        description: "Sistemas electrónicos, automatización y control industrial.",
-        icon: <Cpu className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/3912981/pexels-photo-3912981.jpeg",
-        duration: "5 años",
-        credits: 245
-      },
-      {
-        id: 10,
-        title: "Ingeniería Eléctrica",
-        description: "Sistemas eléctricos de potencia y energía.",
-        icon: <Radio className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/2467558/pexels-photo-2467558.jpeg",
-        duration: "5 años",
-        credits: 252
-      },
-      {
-        id: 12,
-        title: "Ingeniería en Energías Renovables",
-        description: "Sistemas de energía limpia y sostenibilidad.",
-        icon: <Lightbulb className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg",
-        duration: "5 años",
-        credits: 250
-      }
-    ]
-  },
-  {
-    id: "ambiental",
-    title: "Ciencias Ambientales y Química",
-    description: "Carreras orientadas al medio ambiente y procesos químicos",
-    icon: <Leaf className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg",
-    careers: [
-      {
-        id: 7,
-        title: "Ingeniería Química",
-        description: "Procesos químicos industriales y desarrollo de materiales.",
-        icon: <Flask className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg",
-        duration: "5 años",
-        credits: 250
-      },
-      {
-        id: 11,
-        title: "Ingeniería Ambiental",
-        description: "Gestión ambiental y desarrollo sostenible.",
-        icon: <TreePine className="h-12 w-12" />,
-        image: "https://images.pexels.com/photos/1108572/pexels-photo-1108572.jpeg",
-        duration: "5 años",
-        credits: 245
-      }
-    ]
-  }
-];
+import { AreaConocimiento, getFirstImage } from "@/lib/types";
+import Image from "next/image";
+import { createEndpoint } from "@/services/api";
+import { useEffect, useState } from "react";
+import { buildImageUrl } from "@/lib/utils";
 
 export default function OfertaAcademica() {
+  const [areasConocimiento, setAreasConocimiento] = useState<AreaConocimiento[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAreasConocimiento = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(createEndpoint('areas-de-conocimiento'));
+        
+        if (!response.ok) {
+          throw new Error(`Error al cargar las áreas de conocimiento: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setAreasConocimiento(data.docs);
+      } catch (err) {
+        console.error('Error fetching areas de conocimiento:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido al cargar los datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAreasConocimiento();
+  }, []);
+
+  const handleAreaClick = (area: AreaConocimiento) => {
+    const areaData = encodeURIComponent(JSON.stringify(area));
+    window.location.href = `/oferta-academica/area?data=${areaData}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-[#002D62]" />
+          <p className="mt-4 text-lg text-gray-600">Cargando áreas de conocimiento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error al cargar datos</h3>
+            <p className="text-red-600">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-red-600 hover:bg-red-700 text-white"
+            >
+              Intentar nuevamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -218,29 +102,40 @@ export default function OfertaAcademica() {
 
       {/* Areas Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {academicAreas.map((area) => (
-            <Link href={`/oferta-academica/area/${area.id}`} key={area.id}>
-              <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl h-full">
+        {areasConocimiento.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No hay áreas disponibles</h3>
+            <p className="text-gray-600">Por el momento no hay áreas de conocimiento disponibles.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {areasConocimiento?.map((area) => (
+              <Card 
+                key={area.id} 
+                className="overflow-hidden transition-all duration-300 hover:shadow-xl h-full cursor-pointer"
+                onClick={() => handleAreaClick(area)}
+              >
                 <div className="h-48 relative">
-                  <img
-                    src={area.image}
-                    alt={area.title}
+                  <Image
+                    src={buildImageUrl(getFirstImage(area.carrerasRelacionadas[0]?.imagenes || []) ?? 'https://placehold.co/600x400.png')}
+                    alt={area.nombre}
                     className="w-full h-full object-cover"
+                    width={600}
+                    height={400}
                   />
                   <div className="absolute top-4 right-4 bg-white/90 p-2 rounded-full">
-                    {area.icon}
+                    <Cog className="h-12 w-12" />
                   </div>
                 </div>
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {area.title}
+                    {area.nombre}
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    {area.description}
+                    Área de conocimiento con {area.carrerasRelacionadas.length} carreras disponibles
                   </p>
                   <p className="text-sm text-gray-500">
-                    {area.careers.length} carreras disponibles
+                    {area.carrerasRelacionadas.length} carreras disponibles
                   </p>
                   <Button className="w-full mt-4 bg-[#002D62] hover:bg-[#003185] text-white">
                     Ver carreras
@@ -248,9 +143,9 @@ export default function OfertaAcademica() {
                   </Button>
                 </CardContent>
               </Card>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Contact Section */}
