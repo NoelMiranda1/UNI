@@ -166,7 +166,7 @@ export default function EventContent({ id }: { id: string }) {
     if (ampm === 'AM' && hour === 12) hour = 0;
 
     const eventObj = {
-      start: [parseInt(year), monthNumber, parseInt(day), hour, parseInt(minutes)],
+      start: [parseInt(year), monthNumber, parseInt(day), hour, parseInt(minutes)] as [number, number, number, number, number],
       duration: { hours: 2 },
       title: event.title,
       description: event.description,

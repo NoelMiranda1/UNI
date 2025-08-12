@@ -18,7 +18,6 @@ export function NewsSection() {
   const [news, setNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    // Simulating API call with fake data
     const fakeNews: NewsItem[] = [
       {
         id: 1,

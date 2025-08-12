@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Button } from "./ui/button";
 
 const campusImages = [
@@ -26,6 +26,9 @@ const campusImages = [
 
 export function MultimediaSection() {
   const [currentImage, setCurrentImage] = useState(0);
+  const videoId = "aI7QivWKcMA";
+  const youtubeWatchUrl = `https://www.youtube.com/watch?v=${videoId}`;
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev + 1) % campusImages.length);
@@ -39,16 +42,28 @@ export function MultimediaSection() {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-4">
-          <div className="relative pb-[56.25%] h-0">
-            <iframe
-              className="absolute top-0 left-0 w-full h-full rounded-lg"
-              src="https://www.youtube.com/watch?v=aI7QivWKcMA&ab_channel=UNIdeNicaraguaOficial"
-              title="Video Institucional Universidad"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
+          <a
+            href={youtubeWatchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block relative rounded-lg overflow-hidden"
+            aria-label="Ver video institucional en YouTube"
+          >
+            <img
+              src={thumbnailUrl}
+              alt="Video Institucional Universidad"
+              className="w-full h-auto object-cover"
+            />
+            <div className="absolute inset-0 bg-black/35 transition group-hover:bg-black/25" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full bg-white/90 group-hover:bg-white shadow-lg flex items-center justify-center">
+                <Play className="h-8 w-8 text-black" />
+              </div>
+            </div>
+          </a>
+          <p className="mt-2 text-sm text-muted-foreground text-center">
+            Si el video no se reproduce aquí, ábrelo en YouTube.
+          </p>
         </CardContent>
       </Card>
 

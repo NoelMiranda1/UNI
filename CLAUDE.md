@@ -58,10 +58,33 @@ npm run format       # Format code with Prettier
 - **Prettier**: Configured with single quotes, semicolons, and Tailwind plugin
 - **Always response in spanish**
 - **Always use Yarn never npm**
+- **Only user compoenten/ui for create page**
 
 ### Current Git Status
 
 The repository has recently deleted `services/api.ts` and `services/chat.ts` files. These may need to be recreated if API functionality is required.
+
+## UI/UX Standards
+
+### Page Loading States
+For all main pages (Inicio, Quienes Somos, Oferta Académica, Organización, etc.), use the standardized `PageLoader` component:
+
+```typescript
+import { PageLoader } from '@/components/ui/page-loader';
+
+// Usage in page component:
+if (loading) {
+  return <PageLoader message="Cargando información..." />;
+}
+```
+
+The PageLoader provides:
+- Full page skeleton with header and content areas
+- Animated loading spinner with backdrop
+- Consistent UX across all pages
+- Custom loading messages per page
+
+**IMPORTANT**: Always implement this loading state for pages that fetch data to prevent UI freeze.
 
 ## Development Notes
 

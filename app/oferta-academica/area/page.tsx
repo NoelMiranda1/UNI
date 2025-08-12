@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ChevronRight, Clock, Cog } from "lucide-react";
@@ -9,8 +9,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AreaConocimiento, extractDescriptionText, getFirstImage } from "@/lib/types";
 import { buildImageUrl } from "@/lib/utils";
 import Image from 'next/image';
+import { PageLoader } from '@/components/ui/page-loader';
 
-export default function AreaPage() {
+function AreaContent() {
   const [area, setArea] = useState<AreaConocimiento | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -152,4 +153,12 @@ export default function AreaPage() {
       </div>
     </div>
   );
-} 
+}
+
+export default function AreaPage() {
+  return (
+    <Suspense fallback={<PageLoader message="Cargando área..." />}>
+      <AreaContent />
+    </Suspense>
+  );
+}
