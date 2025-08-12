@@ -1,132 +1,170 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createEndpoint } from "@/services/api";
-import { buildImageUrl } from "@/lib/utils";
-import { InicioResponse } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { apiHelpers } from "@/services/api";
 
-interface HeroImage {
+// Interfaz para el tipo de imagen
+interface Imagen {
+  id: string;
+  filename: string;
+  mimeType: string;
+  filesize: number;
+  width: number;
+  height: number;
+  focalX: number;
+  focalY: number;
+  createdAt: string;
+  updatedAt: string;
   url: string;
-  caption: string;
+}
+
+// Interfaz para el tipo de banner
+interface Banner {
+  imagen: Imagen;
+  id: string;
+}
+
+// Interfaz para la respuesta del API
+interface InicioResponse {
+  docs: Array<{
+    id: string;
+    titulo: string;
+    imagenesFondo: Array<Banner & { alt?: string }>;
+    descripcion?: Array<{
+      children: Array<{
+        text: string;
+      }>;
+    }>;
+    descripcionPlano?: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
 }
 
 export function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
-  const [images, setImages] = useState<HeroImage[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const [titulo, setTitulo] = useState<string>('');
+  const [descripcion, setDescripcion] = useState<string>('');
 
   useEffect(() => {
-    const fetchHeroImages = async () => {
+    const fetchBanners = async () => {
       try {
-        setLoading(true);
-
-        const response = await fetch(createEndpoint('/inicio'));
-
-        if (!response.ok) {
-          throw new Error(`Error al cargar las imágenes del hero: ${response.status}`);
+        const response = await apiHelpers.get<InicioResponse>('/inicio');
+        if (response.data?.docs?.[0]) {
+          const data = response.data.docs[0];
+          
+          // Establecer título y descripción
+          setTitulo(data.titulo || 'Universidad Nacional de Ingeniería');
+          setDescripcion(data.descripcionPlano || 'Formando los líderes del mañana en ingeniería y tecnología');
+          
+          // Procesar banners
+          if (data.imagenesFondo && data.imagenesFondo.length > 0) {
+            const bannersData = data.imagenesFondo;
+            setBanners(bannersData);
+            setImagesLoaded(new Array(bannersData.length).fill(false));
+            
+            // Precargar imágenes
+            bannersData.forEach((banner, index) => {
+              const img = new Image();
+              img.onload = () => {
+                setImagesLoaded(prev => {
+                  const newState = [...prev];
+                  newState[index] = true;
+                  return newState;
+                });
+              };
+              img.src = `${process.env.NEXT_PUBLIC_URL_IMAGES}${banner.imagen.url}`;
+            });
+          }
         }
-
-        const data: InicioResponse = await response.json();
-
-        if (data.docs && data.docs.length > 0) {
-          const heroData = data.docs[0];
-          const heroImages: HeroImage[] = heroData.imagenesFondo.map((imgFondo) => ({
-            url: buildImageUrl(imgFondo.imagen.url),
-            caption: heroData.titulo || "Universidad Nacional de Ingeniería"
-          }));
-
-          setImages(heroImages);
-        } else {
-          setImages([
-            {
-              url: "https://images.pexels.com/photos/2305098/pexels-photo-2305098.jpeg",
-              caption: "Campus Principal UNI"
-            }
-          ]);
-        }
-      } catch (err) {
-        setImages([
-          {
-            url: "https://images.pexels.com/photos/2305098/pexels-photo-2305098.jpeg",
-            caption: "Campus Principal UNI"
-          },
-        ]);
+      } catch {
+        // Error silencioso - usar valores por defecto
+        setTitulo('Universidad Nacional de Ingeniería');
+        setDescripcion('Formando los líderes del mañana en ingeniería y tecnología');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHeroImages();
+    fetchBanners();
   }, []);
 
   useEffect(() => {
-    if (images.length === 0) return;
-
+    if (banners.length === 0) return;
+    
     const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
+      setCurrentImage((prev) => (prev + 1) % banners.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [banners.length]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="relative overflow-hidden">
-  //       <div className="absolute inset-0 bg-gray-900" />
-  //       <div className="pb-80 pt-16 sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40 relative z-10">
-  //         <div className="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
-  //           <div className="flex items-center justify-center">
-  //             <div className="text-center">
-  //               <Loader2 className="h-12 w-12 animate-spin mx-auto text-white" />
-  //               <p className="mt-4 text-lg text-gray-100">Cargando imágenes...</p>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const imagesToShow = banners.map(banner => ({
+    url: `${process.env.NEXT_PUBLIC_URL_IMAGES}${banner.imagen.url}`,
+    caption: banner.imagen.filename
+  }));
 
+  // Verificar si todas las imágenes están cargadas
+  const allImagesLoaded = imagesLoaded.length > 0 && imagesLoaded.every(loaded => loaded);
 
   return (
     <div className="relative overflow-hidden">
+      {/* Loading Skeleton */}
+      {(loading || !allImagesLoaded) && (
+        <div className="absolute inset-0 z-0">
+          <Skeleton className="h-full w-full" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
+        </div>
+      )}
+
       {/* Image Carousel */}
-      <div className="absolute inset-0 z-0">
-        {loading && (
-            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-              <Loader2 className="h-12 w-12 animate-spin text-white" />
+      {!loading && banners.length > 0 && (
+        <div className={`absolute inset-0 z-0 transition-opacity duration-500 ${
+          allImagesLoaded ? 'opacity-100' : 'opacity-0'
+        }`}>
+          {imagesToShow.map((image, index) => (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                currentImage === index ? "opacity-100" : "opacity-0"
+              }`}
+              style={{
+                backgroundImage: `url('${image.url}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            >
+              <div className="absolute inset-0 bg-black/60" />
             </div>
-        )}
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              currentImage === index ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              backgroundImage: `url('${image.url}')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          >
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <div className="pb-80 pt-16 sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40 relative z-10">
         <div className="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
           <div className="sm:max-w-lg">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              Universidad Nacional de Ingeniería
+              {titulo || 'Universidad Nacional de Ingeniería'}
             </h1>
             <p className="mt-4 text-xl text-gray-100">
-              Formando los líderes del mañana en ingeniería y tecnología
+              {descripcion || 'Formando los líderes del mañana en ingeniería y tecnología'}
             </p>
           </div>
           <div className="mt-10">
@@ -139,18 +177,21 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Image Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentImage === index ? "bg-white w-4" : "bg-white/50"
-              }`}
-              onClick={() => setCurrentImage(index)}
-            />
-          ))}
-        </div>
+        {/* Image Indicators - Solo mostrar cuando las imágenes estén cargadas */}
+        {!loading && banners.length > 0 && allImagesLoaded && (
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            {imagesToShow.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentImage === index ? "bg-white w-4" : "bg-white/50"
+                }`}
+                onClick={() => setCurrentImage(index)}
+                aria-label={`Ir a imagen ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Send, X, MinusCircle, Bot, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { chatService, Message } from '@/services/chat';
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([{
+  const [messages, setMessages] = useState<any[]>([{
     id: '1',
     role: 'assistant',
     content: '¡Hola! Soy el asistente virtual de la Universidad Nacional de Ingeniería. ¿En qué puedo ayudarte?'
@@ -31,7 +30,7 @@ export function Chatbot() {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = {
+    const userMessage: any = {
       id: Date.now().toString(),
       role: 'user',
       content: input.trim()
@@ -41,20 +40,14 @@ export function Chatbot() {
     setInput('');
     setIsLoading(true);
 
-    try {
-      const response = await chatService.sendMessage(messages.concat(userMessage));
-      setMessages(prev => [...prev, response]);
-    } catch (error) {
-      console.error('Error:', error);
-      const errorMessage: Message = {
+
+      const errorMessage: any = {
         id: Date.now().toString(),
         role: 'assistant',
         content: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.'
       };
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
-    }
   };
 
   const toggleChat = () => {

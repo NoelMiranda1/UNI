@@ -37,13 +37,12 @@ export function MultimediaSection() {
 
   return (
     <div className="space-y-6">
-      {/* Video Section */}
       <Card>
         <CardContent className="p-4">
           <div className="relative pb-[56.25%] h-0">
             <iframe
               className="absolute top-0 left-0 w-full h-full rounded-lg"
-              src="https://www.youtube-nocookie.com/embed/9bZkp7q19f0?origin=https://stackblitz.com"
+              src="https://www.youtube.com/watch?v=aI7QivWKcMA&ab_channel=UNIdeNicaraguaOficial"
               title="Video Institucional Universidad"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -53,7 +52,6 @@ export function MultimediaSection() {
         </CardContent>
       </Card>
 
-      {/* Image Carousel */}
       <Card>
         <CardContent className="p-4">
           <div className="relative">
