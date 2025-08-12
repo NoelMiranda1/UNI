@@ -1,206 +1,438 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, GraduationCap, Clock, BookOpen } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { 
+  GraduationCap, 
+  Download, 
+  ExternalLink, 
+  BookOpen, 
+  Clock, 
+  Award,
+  ArrowLeft,
+  FileText,
+  Users,
+  Target,
+  Sparkles,
+  CheckCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageLoader } from '@/components/ui/page-loader';
+import areasConocimientoService, { type AreaConocimiento, type CarreraRelacionada } from '@/services/areas-conocimiento';
+import Link from 'next/link';
+import Image from 'next/image';
 
-interface Career {
-  id: number;
-  title: string;
-  description: string;
-  icon: JSX.Element;
-  image: string;
-  duration: string;
-  credits: number;
-  overview: string;
-  curriculum: string[];
-  jobOpportunities: string[];
-  requirements: string[];
+interface CareerContentProps {
+  id: string;
 }
 
-const careerData: { [key: string]: Career } = {
-  "1": {
-    id: 1,
-    title: "Ingeniería en Computación",
-    description: "Desarrollo de software, sistemas computacionales y tecnologías de la información.",
-    icon: <BookOpen className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg",
-    duration: "5 años",
-    credits: 250,
-    overview: "La carrera de Ingeniería en Computación forma profesionales capaces de diseñar, desarrollar e implementar soluciones tecnológicas innovadoras.",
-    curriculum: [
-      "Fundamentos de Programación",
-      "Estructuras de Datos",
-      "Bases de Datos",
-      "Redes de Computadoras",
-      "Ingeniería de Software",
-      "Sistemas Operativos",
-      "Inteligencia Artificial",
-      "Desarrollo Web"
-    ],
-    jobOpportunities: [
-      "Desarrollador de Software",
-      "Arquitecto de Sistemas",
-      "Analista de Sistemas",
-      "Administrador de Bases de Datos",
-      "Consultor TI"
-    ],
-    requirements: [
-      "Bachillerato aprobado",
-      "Aprobar examen de admisión",
-      "Documentación completa",
-      "Curso propedéutico"
-    ]
-  },
-  "2": {
-    id: 2,
-    title: "Arquitectura",
-    description: "Diseño arquitectónico, urbanismo y planificación de espacios.",
-    icon: <BookOpen className="h-12 w-12" />,
-    image: "https://images.pexels.com/photos/157811/pexels-photo-157811.jpeg",
-    duration: "5 años",
-    credits: 255,
-    overview: "La carrera de Arquitectura forma profesionales con una sólida base en diseño, planificación y construcción de espacios habitables.",
-    curriculum: [
-      "Diseño Arquitectónico",
-      "Historia de la Arquitectura",
-      "Construcción",
-      "Urbanismo",
-      "Estructuras",
-      "Instalaciones",
-      "Sustentabilidad",
-      "Representación Digital"
-    ],
-    jobOpportunities: [
-      "Arquitecto Proyectista",
-      "Diseñador de Interiores",
-      "Urbanista",
-      "Supervisor de Obra",
-      "Consultor Independiente"
-    ],
-    requirements: [
-      "Bachillerato aprobado",
-      "Aprobar examen de admisión",
-      "Documentación completa",
-      "Curso propedéutico"
-    ]
-  }
-};
-
-export default function CareerContent({ id }: { id: string }) {
-  const [career, setCareer] = useState<Career | null>(null);
-  const router = useRouter();
+export default function CareerContent({ id }: CareerContentProps) {
+  const [area, setArea] = useState<AreaConocimiento | null>(null);
+  const [selectedCarrera, setSelectedCarrera] = useState<CarreraRelacionada | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setCareer(careerData[id] || null);
+    if (id) {
+      fetchAreaDetalle(id);
+    }
   }, [id]);
 
-  if (!career) {
-    return <div>Loading...</div>;
+  const fetchAreaDetalle = async (areaId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Intentar obtener el área directamente por ID
+      try {
+        const areaEncontrada = await areasConocimientoService.getAreaById(areaId);
+        setArea(areaEncontrada);
+        
+        // Seleccionamos la primera carrera si existe
+        if (areaEncontrada.carrerasRelacionadas && areaEncontrada.carrerasRelacionadas.length > 0) {
+          setSelectedCarrera(areaEncontrada.carrerasRelacionadas[0]);
+        }
+      } catch (apiError) {
+        // Si el endpoint específico no funciona, intentar obtener todas las áreas
+        console.log('Intentando obtener todas las áreas para encontrar el ID:', areaId);
+        const response = await areasConocimientoService.getAreas({ limit: 100 });
+        
+        const areaEncontrada = response.docs.find(a => a.id === areaId);
+        
+        if (!areaEncontrada) {
+          throw new Error('Área no encontrada');
+        }
+        
+        setArea(areaEncontrada);
+        
+        // Seleccionamos la primera carrera si existe
+        if (areaEncontrada.carrerasRelacionadas && areaEncontrada.carrerasRelacionadas.length > 0) {
+          setSelectedCarrera(areaEncontrada.carrerasRelacionadas[0]);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching area detail:', err);
+      setError(err instanceof Error ? err.message : 'Error al cargar los datos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const extractDescription = (descripcion: any[]): string => {
+    return areasConocimientoService.extractPlainDescription(descripcion);
+  };
+
+  const getCarreraColor = (index: number) => {
+    const colors = [
+      'from-blue-500 to-indigo-600',
+      'from-purple-500 to-pink-600',
+      'from-green-500 to-teal-600',
+      'from-orange-500 to-red-600',
+      'from-cyan-500 to-blue-600',
+      'from-violet-500 to-purple-600',
+    ];
+    return colors[index % colors.length];
+  };
+
+  if (loading) {
+    return <PageLoader message="Cargando información del área..." />;
+  }
+
+  if (error || !area) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center">
+            <p className="text-red-600 mb-4">{error || 'No se encontró el área'}</p>
+            <Link href="/oferta-academica">
+              <Button variant="outline">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver a Oferta Académica
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative py-24 bg-[#002D62]">
-        <div className="absolute inset-0 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `url('${career.image}')`,
-              opacity: 0.2
-            }}
-          />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Button 
-            variant="ghost" 
-            className="mb-6 text-white hover:text-gray-200"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
-          </Button>
+      <div className="relative bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+          <Link href="/oferta-academica">
+            <Button variant="ghost" className="text-white hover:bg-white/10 mb-6">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver a Áreas
+            </Button>
+          </Link>
           
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl mb-6">
-            {career.title}
-          </h1>
-          <p className="mt-6 text-xl text-gray-300 max-w-3xl">
-            {career.description}
-          </p>
-          
-          <div className="mt-8 flex flex-wrap gap-4 text-white">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              <span>{career.duration}</span>
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                {area.nombre}
+              </h1>
+              <p className="text-xl text-blue-100 mb-6">
+                Explora las {area.carrerasRelacionadas.length} carreras disponibles en esta área de conocimiento
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5" />
+                    <span className="font-semibold">{area.carrerasRelacionadas.length}</span>
+                    <span>Carreras</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-5 w-5" />
+                    <span>Títulos Profesionales</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center">
-              <GraduationCap className="h-5 w-5 mr-2" />
-              <span>{career.credits} créditos</span>
+            
+            <div className="lg:w-1/3">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+                <h3 className="text-lg font-semibold mb-4">Carreras Disponibles</h3>
+                <div className="space-y-2">
+                  {area.carrerasRelacionadas.slice(0, 3).map((carrera) => (
+                    <div key={carrera.id} className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-400" />
+                      <span className="text-sm">{carrera.nombre}</span>
+                    </div>
+                  ))}
+                  {area.carrerasRelacionadas.length > 3 && (
+                    <span className="text-sm text-blue-200">
+                      +{area.carrerasRelacionadas.length - 3} más...
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content Sections */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="md:col-span-2 space-y-12">
-            {/* Overview */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Descripción General</h2>
-              <p className="text-gray-600">{career.overview}</p>
-            </section>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        {area.carrerasRelacionadas.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <BookOpen className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">No hay carreras disponibles en esta área por el momento.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Sidebar - Lista de Carreras */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Carreras del Área
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {area.carrerasRelacionadas.map((carrera, index) => (
+                      <button
+                        key={carrera.id}
+                        onClick={() => setSelectedCarrera(carrera)}
+                        className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                          selectedCarrera?.id === carrera.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg bg-gradient-to-br ${getCarreraColor(index)} text-white flex-shrink-0`}>
+                            <GraduationCap className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 text-sm">
+                              {carrera.nombre}
+                            </h4>
+                            {carrera.urlPerfilAcademico && (
+                              <Badge 
+                                variant="secondary" 
+                                className="mt-1 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              >
+                                <FileText className="h-3 w-3 mr-1" />
+                                Perfil disponible
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Curriculum */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Plan de Estudios</h2>
-              <ul className="grid md:grid-cols-2 gap-4">
-                {career.curriculum.map((item, index) => (
-                  <li key={index} className="flex items-center bg-white p-4 rounded-lg shadow">
-                    <BookOpen className="h-5 w-5 text-primary-dark mr-2" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {/* Main Content - Detalle de Carrera */}
+            <div className="lg:col-span-2">
+              {selectedCarrera && (
+                <div className="space-y-6">
+                  {/* Header de Carrera */}
+                  <Card className="overflow-hidden">
+                    {selectedCarrera.imagenes && selectedCarrera.imagenes.length > 0 && (
+                      <div className="relative h-64 w-full">
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${selectedCarrera.imagenes[0].imagen.url}`}
+                          alt={selectedCarrera.nombre}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                          <h2 className="text-3xl font-bold text-white mb-2">
+                            {selectedCarrera.nombre}
+                          </h2>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <CardContent className="p-6">
+                      {selectedCarrera.urlPerfilAcademico && (
+                        <div className="flex flex-wrap gap-3 mb-6">
+                          <a 
+                            href={selectedCarrera.urlPerfilAcademico} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Ver Perfil Académico
+                            </Button>
+                          </a>
+                          <a 
+                            href={selectedCarrera.urlPerfilAcademico} 
+                            download
+                          >
+                            <Button 
+                              variant="outline" 
+                              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Descargar PDF
+                            </Button>
+                          </a>
+                        </div>
+                      )}
 
-            {/* Job Opportunities */}
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Campo Laboral</h2>
-              <ul className="grid md:grid-cols-2 gap-4">
-                {career.jobOpportunities.map((item, index) => (
-                  <li key={index} className="flex items-center bg-white p-4 rounded-lg shadow">
-                    <GraduationCap className="h-5 w-5 text-primary-dark mr-2" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
+                      <Tabs defaultValue="descripcion" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="descripcion">Descripción</TabsTrigger>
+                          <TabsTrigger value="perfil">Perfil Profesional</TabsTrigger>
+                          <TabsTrigger value="campo">Campo Laboral</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="descripcion" className="mt-6">
+                          <div className="prose prose-blue max-w-none">
+                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                              <Target className="h-5 w-5 text-blue-600" />
+                              Objetivo de la Carrera
+                            </h3>
+                            <p className="text-gray-700 leading-relaxed">
+                              {extractDescription(selectedCarrera.descripcion) || 
+                               'Formación integral de profesionales altamente capacitados en su área de especialización.'}
+                            </p>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="perfil" className="mt-6">
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                              <Users className="h-5 w-5 text-purple-600" />
+                              Perfil del Egresado
+                            </h3>
+                            <div className="bg-purple-50 rounded-lg p-6">
+                              <ul className="space-y-3">
+                                <li className="flex items-start gap-2">
+                                  <CheckCircle className="h-5 w-5 text-purple-600 mt-0.5" />
+                                  <span className="text-gray-700">
+                                    Sólidos conocimientos teóricos y prácticos en su área de especialización
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <CheckCircle className="h-5 w-5 text-purple-600 mt-0.5" />
+                                  <span className="text-gray-700">
+                                    Capacidad de liderazgo y trabajo en equipo multidisciplinario
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <CheckCircle className="h-5 w-5 text-purple-600 mt-0.5" />
+                                  <span className="text-gray-700">
+                                    Compromiso con el desarrollo sostenible y responsabilidad social
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                  <CheckCircle className="h-5 w-5 text-purple-600 mt-0.5" />
+                                  <span className="text-gray-700">
+                                    Habilidades para la investigación y la innovación tecnológica
+                                  </span>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="campo" className="mt-6">
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                              <Sparkles className="h-5 w-5 text-green-600" />
+                              Campo Laboral
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="bg-green-50 rounded-lg p-4">
+                                <h4 className="font-semibold text-green-900 mb-2">Sector Público</h4>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                  <li>• Instituciones gubernamentales</li>
+                                  <li>• Empresas estatales</li>
+                                  <li>• Proyectos de desarrollo nacional</li>
+                                </ul>
+                              </div>
+                              <div className="bg-blue-50 rounded-lg p-4">
+                                <h4 className="font-semibold text-blue-900 mb-2">Sector Privado</h4>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                  <li>• Empresas nacionales e internacionales</li>
+                                  <li>• Consultoría especializada</li>
+                                  <li>• Emprendimiento propio</li>
+                                </ul>
+                              </div>
+                              <div className="bg-orange-50 rounded-lg p-4">
+                                <h4 className="font-semibold text-orange-900 mb-2">Investigación</h4>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                  <li>• Centros de investigación</li>
+                                  <li>• Universidades</li>
+                                  <li>• Desarrollo tecnológico</li>
+                                </ul>
+                              </div>
+                              <div className="bg-purple-50 rounded-lg p-4">
+                                <h4 className="font-semibold text-purple-900 mb-2">Internacional</h4>
+                                <ul className="text-sm text-gray-700 space-y-1">
+                                  <li>• Organismos internacionales</li>
+                                  <li>• Cooperación técnica</li>
+                                  <li>• Empresas multinacionales</li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
 
-          {/* Sidebar */}
-          <div className="md:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-lg sticky top-24">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Requisitos de Admisión</h3>
-              <ul className="space-y-4">
-                {career.requirements.map((req, index) => (
-                  <li key={index} className="flex items-center text-gray-600">
-                    <div className="h-2 w-2 bg-primary-dark rounded-full mr-3" />
-                    {req}
-                  </li>
-                ))}
-              </ul>
-              
-              <Button className="w-full mt-8 bg-primary-dark hover:bg-primary">
-                Aplicar Ahora
-              </Button>
+                      {/* Información Adicional */}
+                      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <Clock className="h-8 w-8 mx-auto text-gray-600 mb-2" />
+                          <p className="text-sm text-gray-600">Duración</p>
+                          <p className="font-semibold">5 años</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <Award className="h-8 w-8 mx-auto text-gray-600 mb-2" />
+                          <p className="text-sm text-gray-600">Título</p>
+                          <p className="font-semibold">Ingeniero/a</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 text-center">
+                          <Users className="h-8 w-8 mx-auto text-gray-600 mb-2" />
+                          <p className="text-sm text-gray-600">Modalidad</p>
+                          <p className="font-semibold">Presencial</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* CTA Section */}
+                  <Card className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold mb-2">¿Listo para comenzar tu carrera?</h3>
+                      <p className="mb-4 text-blue-100">
+                        Obtén más información sobre el proceso de admisión y requisitos
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <Button className="bg-white text-blue-600 hover:bg-gray-100">
+                          Solicitar Información
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="border-white text-blue-600 hover:bg-white/10 hover:text-white"
+                        >
+                          Proceso de Admisión
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
