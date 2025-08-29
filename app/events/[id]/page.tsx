@@ -1,15 +1,7 @@
 import EventContent from './event-content';
 
-export async function generateStaticParams() {
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-    { id: '4' },
-    { id: '5' },
-    { id: '6' }
-  ];
-}
+// Página dinámica que se renderiza en el servidor (SSR)
+// No necesita generateStaticParams ya que no usamos exportación estática
 
 export default function EventDetail({ params }: { params: { id: string } }) {
   return <EventContent id={params.id} />;

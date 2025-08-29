@@ -1,10 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Removido output: 'export' para permitir SSR/ISR
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
+  images: {
+    domains: ['cmsuni-production.up.railway.app'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cmsuni-production.up.railway.app',
+        pathname: '/**',
+      },
+    ],
+  },
   
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,

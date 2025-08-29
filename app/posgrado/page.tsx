@@ -59,7 +59,7 @@ export default function PostgradoPage() {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl mb-6">
-            Estudios de Postgrado
+            Estudios de Posgrado Y Educación Continua
           </h1>
           <p className="mt-6 text-xl text-gray-300 max-w-3xl mx-auto">
             Eleva tu carrera profesional con nuestros programas de postgrado diseñados para formar líderes en ingeniería y tecnología
