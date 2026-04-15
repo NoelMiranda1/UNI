@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { apiHelpers } from "@/services/api";
+import { safeImageUrl } from '@/lib/utils';
 
 // Interfaz para el tipo de imagen
 interface Imagen {
@@ -89,7 +90,7 @@ export function Hero() {
                   return newState;
                 });
               };
-              img.src = `${process.env.NEXT_PUBLIC_URL_IMAGES}${banner.imagen.url}`;
+              img.src = safeImageUrl(banner.imagen.url);
             });
           }
         }
@@ -116,7 +117,7 @@ export function Hero() {
   }, [banners.length]);
 
   const imagesToShow = banners.map(banner => ({
-    url: `${process.env.NEXT_PUBLIC_URL_IMAGES}${banner.imagen.url}`,
+    url: safeImageUrl(banner.imagen.url),
     caption: banner.imagen.filename
   }));
 

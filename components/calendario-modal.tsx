@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Calendar, Download, FileText } from 'lucide-react';
+import { safeImageUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -67,12 +68,12 @@ export function CalendarioModal({ isOpen, onClose }: CalendarioModalProps) {
   };
 
   const handleView = (archivo: ArchivoCalendario) => {
-    const fileUrl = `${process.env.NEXT_PUBLIC_URL_IMAGES}${archivo.url}`;
+    const fileUrl = safeImageUrl(archivo.url);
     window.open(fileUrl, '_blank');
   };
 
   const handleDownload = async (archivo: ArchivoCalendario) => {
-    const fileUrl = `${process.env.NEXT_PUBLIC_URL_IMAGES}${archivo.url}`;
+    const fileUrl = safeImageUrl(archivo.url);
     
     try {
       const response = await fetch(fileUrl);

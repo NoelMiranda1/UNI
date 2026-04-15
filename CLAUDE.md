@@ -4,91 +4,101 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the official web portal for Universidad Nacional de Ingeniería (UNI), built with Next.js 14 App Router, TypeScript, and Tailwind CSS. The application is configured for static export (`output: 'export'` in next.config.js).
+Portal web oficial de la Universidad Nacional de Ingeniería (UNI), construido con Next.js 14 App Router, TypeScript y Tailwind CSS. La aplicación consume datos de un CMS Payload desplegado en Railway (`uniapi.onmisales.software`).
 
-## Core Development Commands
+## Comandos de Desarrollo
 
 ```bash
-# Development
-npm run dev          # Start development server on http://localhost:3000
+# Desarrollo
+yarn dev          # Servidor de desarrollo en http://localhost:3000
 
-# Building & Production
-npm run build        # Build for production (static export)
-npm run start        # Start production server
+# Build y Producción
+yarn build        # Construir para producción
+yarn start        # Iniciar servidor de producción
 
-# Code Quality
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
+# Calidad de Código
+yarn lint         # Ejecutar ESLint
+yarn format       # Formatear con Prettier
 ```
 
-## Architecture & Structure
+## Arquitectura
 
-### Application Stack
-- **Framework**: Next.js 14.1.3 with App Router
-- **Language**: TypeScript with strict mode enabled
-- **Styling**: Tailwind CSS with custom animations
-- **UI Components**: Radix UI primitives following shadcn/ui patterns
-- **State Management**: Zustand (see `lib/store.ts`)
-- **Forms**: React Hook Form with Zod validation
+### Stack Principal
+- **Framework**: Next.js 14.1.3 con App Router
+- **Lenguaje**: TypeScript con modo estricto
+- **Estilos**: Tailwind CSS con animaciones personalizadas
+- **UI**: Componentes Radix UI siguiendo patrones shadcn/ui
+- **Estado**: Zustand (`lib/store.ts`)
+- **Formularios**: React Hook Form + Zod
+- **HTTP**: Axios con interceptores configurados
 
-### Key Architectural Decisions
+### Estructura del Proyecto
 
-1. **Static Export**: The app is configured for static site generation with `output: 'export'`
-2. **Component Architecture**: UI components in `components/ui/` follow shadcn/ui patterns with composable primitives
-3. **Path Aliases**: Use `@/` prefix for imports (configured in tsconfig.json)
-4. **Font Loading**: Inter font is loaded via Next.js font optimization
+```
+app/                    # Páginas Next.js App Router
+├── [ruta]/[id]/       # Rutas dinámicas con componentes *-content.tsx
+components/
+├── ui/                # Componentes base shadcn/ui (Radix UI)
+├── navbar.tsx         # Navegación principal
+├── footer.tsx         # Pie de página
+├── hero.tsx           # Sección hero con carrusel
+├── chatbot.tsx        # Asistente virtual
+services/              # Capa de servicios API
+├── api.ts             # Cliente Axios base con interceptores
+├── noticias.ts        # Servicio de noticias
+├── eventos.ts         # Servicio de eventos
+├── areas-conocimiento.ts
+├── recintos.ts
+lib/
+├── config.ts          # Configuración de variables de entorno
+├── store.ts           # Store Zustand (drawer state)
+├── types.ts           # Tipos TypeScript compartidos
+├── utils.ts           # Utilidades (cn para clases)
+hooks/                 # Custom React hooks
+```
 
-### Project Structure
+### Patrón de Servicios API
 
-- `app/` - Next.js App Router pages and layouts
-  - Dynamic routes use `[id]` folders with dedicated content components
-  - Each route has its own `page.tsx` and optionally a content component
-- `components/` - Reusable React components
-  - `ui/` - Base UI components (Radix UI based)
-  - Main layout components: navbar, footer, chatbot, hero, etc.
-- `lib/` - Utilities and store configuration
-- `services/` - API service layer (currently has api.ts and chat.ts deleted)
-- `hooks/` - Custom React hooks
+Cada servicio en `services/` sigue este patrón:
+```typescript
+import api from './api';
 
-### Important Configuration
+class MiServicio {
+  async getItems(params?: { page?: number; limit?: number }): Promise<Response> {
+    const response = await api.get<Response>('/endpoint', { params });
+    return response.data;
+  }
 
-- **ESLint**: Configured with Next.js core-web-vitals and Prettier integration
-- **TypeScript**: Strict mode enabled with bundler module resolution
-- **Tailwind**: Custom configuration with animation utilities
-- **Prettier**: Configured with single quotes, semicolons, and Tailwind plugin
-- **Always response in spanish**
-- **Always use Yarn never npm**
-- **Only user compoenten/ui for create page**
+  async getItemById(id: string): Promise<Item> {
+    const response = await api.get<Item>(`/endpoint/${id}`);
+    return response.data;
+  }
+}
 
-### Current Git Status
+export default new MiServicio();
+```
 
-The repository has recently deleted `services/api.ts` and `services/chat.ts` files. These may need to be recreated if API functionality is required.
+### Patrón de Páginas con Carga
 
-## UI/UX Standards
-
-### Page Loading States
-For all main pages (Inicio, Quienes Somos, Oferta Académica, Organización, etc.), use the standardized `PageLoader` component:
-
+Las páginas que cargan datos deben usar `PageLoader`:
 ```typescript
 import { PageLoader } from '@/components/ui/page-loader';
 
-// Usage in page component:
 if (loading) {
   return <PageLoader message="Cargando información..." />;
 }
 ```
 
-The PageLoader provides:
-- Full page skeleton with header and content areas
-- Animated loading spinner with backdrop
-- Consistent UX across all pages
-- Custom loading messages per page
+## Configuración Importante
 
-**IMPORTANT**: Always implement this loading state for pages that fetch data to prevent UI freeze.
+- **Path Aliases**: Usar `@/` para imports (ej: `@/components/ui/button`)
+- **Imágenes Remotas**: Dominio permitido `uniapi.onmisales.software`
+- **API Base URL**: `https://uniapi.onmisales.software/api`
+- **ESLint**: Ignora errores durante builds
 
-## Development Notes
+## Reglas de Desarrollo
 
-- The chatbot component exists but its service layer has been removed
-- Images are unoptimized due to static export configuration
-- Development webpack caching is disabled to prevent ENOENT errors
-- ESLint is set to ignore errors during builds
+- **Idioma**: Siempre responder en español
+- **Package Manager**: Siempre usar Yarn, nunca npm
+- **Componentes UI**: Solo usar componentes de `components/ui/` para crear páginas
+- **Tipos**: Definir interfaces en `lib/types.ts` o en el servicio correspondiente

@@ -18,6 +18,7 @@ import noticiasService, { type Noticia } from "@/services/noticias";
 import { PageLoader } from "@/components/ui/page-loader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { safeImageUrl } from '@/lib/utils';
 import { Badge } from "@/components/ui/badge";
 
 export default function NewsPage() {
@@ -146,7 +147,7 @@ export default function NewsPage() {
                     <div className="relative h-56 bg-gray-100">
                       {noticia.imagen ? (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${noticia.imagen.url}`}
+                          src={safeImageUrl(noticia.imagen.url)}
                           alt={noticia.nombre}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"

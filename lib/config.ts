@@ -2,7 +2,7 @@
 export const config = {
   // Variables públicas (accesibles en el cliente)
   public: {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://uniapi.onmisales.software/api',
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
     appName: process.env.NEXT_PUBLIC_APP_NAME || 'Universidad Nacional de Ingeniería',
     youtubeChannelId: process.env.NEXT_PUBLIC_YOUTUBE_CHANNEL_ID || '@UNIdeNicaragua',

@@ -24,6 +24,7 @@ import { fetchOrganizacion, type Organizacion, type Division, type Cargo } from 
 import { PageLoader } from '@/components/ui/page-loader';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import { safeImageUrl } from '@/lib/utils';
 
 export default function OrganizacionPage() {
   const [organizacion, setOrganizacion] = useState<Organizacion | null>(null);
@@ -245,7 +246,7 @@ export default function OrganizacionPage() {
                         {selectedCargo.fotoEncargado ? (
                           <div className="relative h-32 w-32 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
                             <Image
-                              src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${selectedCargo.fotoEncargado?.url}`}
+                              src={safeImageUrl(selectedCargo.fotoEncargado?.url)}
                               alt={selectedCargo.nombreEncargado}
                               fill
                               className="object-cover"

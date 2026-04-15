@@ -93,7 +93,7 @@ class RecintosService {
 
   getImageUrl(foto: FotoRecinto | undefined): string | null {
     if (!foto?.url) return null;
-    return `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://cmsuni-production.up.railway.app'}${foto.url}`;
+    return `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://uniapi.onmisales.software'}${foto.url}`;
   }
 
   getPrincipalImage(fotos: ImagenRecinto[]): string | null {

@@ -101,7 +101,7 @@ export default function NewsContent({ id }: NewsContentProps) {
         {noticia.imagen ? (
           <>
             <Image
-              src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${noticia.imagen.url}`}
+              src={safeImageUrl(noticia.imagen.url)}
               alt={noticia.nombre}
               fill
               className="object-cover"

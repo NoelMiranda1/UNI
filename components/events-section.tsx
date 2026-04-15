@@ -3,6 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { safeImageUrl } from '@/lib/utils';
 import { useEffect, useState } from "react";
 import { Clock, MapPin, ChevronRight } from "lucide-react";
 import eventosService, { type Evento } from "@/services/eventos";
@@ -60,7 +61,7 @@ export function EventsSection() {
         {events.map((event) => {
           const { dia, mes } = formatDate(event.fecha);
           const imageUrl = event.imagenes?.[0]?.imagen?.url 
-            ? `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://cmsuni-production.up.railway.app'}${event.imagenes[0].imagen.url}`
+            ? safeImageUrl(event.imagenes[0].imagen.url)
             : null;
           
           return (

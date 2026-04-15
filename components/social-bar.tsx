@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { safeImageUrl } from '@/lib/utils';
 import { Facebook, Twitter, Instagram, Linkedin, Globe, Youtube, Rss } from 'lucide-react';
 import redesSocialesService, { type RedSocial } from '@/services/redes-sociales';
 
@@ -58,7 +59,7 @@ console.log('redesSociales',redesSociales)
       <div className="flex flex-col space-y-4">
         {redesSociales.map((red) => {
           const iconUrl = red.icono?.url 
-            ? `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://cmsuni-production.up.railway.app'}${red.icono.url}`
+            ? safeImageUrl(red.icono.url)
             : null;
           // const iconUrl = null
 

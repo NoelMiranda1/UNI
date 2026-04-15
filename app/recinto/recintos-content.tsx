@@ -154,7 +154,7 @@ export function RecintosContent({ recintos }: RecintosContentProps) {
                 </h3>
                 
                 <p className="text-gray-200 line-clamp-2">
-                  {recinto.descripcion.split('\n')[0]}
+                  {recinto.descripcion?.split('\n')[0] || 'Campus universitario de la UNI'}
                 </p>
                 
                 {/* Quick Info */}

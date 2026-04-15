@@ -244,7 +244,7 @@ export default function CareerContent({ id }: CareerContentProps) {
                     {selectedCarrera.imagenes && selectedCarrera.imagenes.length > 0 && (
                       <div className="relative h-64 w-full">
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${selectedCarrera.imagenes[0].imagen.url}`}
+                          src={safeImageUrl(selectedCarrera.imagenes[0].imagen.url)}
                           alt={selectedCarrera.nombre}
                           fill
                           className="object-cover"

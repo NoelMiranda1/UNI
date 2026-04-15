@@ -5,6 +5,7 @@ import { Clock, MapPin, Calendar, ChevronLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import eventosService, { type Evento } from '@/services/eventos';
+import { safeImageUrl } from '@/lib/utils';
 
 interface EventoDetailContentProps {
   evento: Evento | null;
@@ -30,7 +31,7 @@ export function EventoDetailContent({ evento }: EventoDetailContentProps) {
   const descripcion = eventosService.extractDescripcion(evento.descripcion);
   const fecha = eventosService.formatDate(evento.fecha);
   const imageUrl = evento.imagenes?.[0]?.imagen?.url 
-    ? `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://cmsuni-production.up.railway.app'}${evento.imagenes[0].imagen.url}`
+    ? safeImageUrl(evento.imagenes[0].imagen.url)
     : null;
 
   const handleShare = () => {
@@ -110,7 +111,7 @@ export function EventoDetailContent({ evento }: EventoDetailContentProps) {
                 <h2 className="text-2xl font-semibold mb-6">Galería</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {evento.imagenes.slice(1).map((img, index) => {
-                    const imgUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://cmsuni-production.up.railway.app'}${img.imagen.url}`;
+                    const imgUrl = safeImageUrl(img.imagen.url);
                     return (
                       <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden">
                         <Image

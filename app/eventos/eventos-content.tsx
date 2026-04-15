@@ -6,6 +6,7 @@ import { Clock, MapPin, Calendar, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import eventosService, { type Evento } from '@/services/eventos';
+import { safeImageUrl } from '@/lib/utils';
 
 interface EventosContentProps {
   eventos: Evento[];
@@ -45,7 +46,7 @@ export function EventosContent({ eventos }: EventosContentProps) {
             {eventos.map((evento) => {
               const { dia, mes, año } = formatDate(evento.fecha);
               const imageUrl = evento.imagenes?.[0]?.imagen?.url 
-                ? `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://cmsuni-production.up.railway.app'}${evento.imagenes[0].imagen.url}`
+                ? safeImageUrl(evento.imagenes[0].imagen.url)
                 : null;
               const descripcion = eventosService.extractDescripcion(evento.descripcion);
               

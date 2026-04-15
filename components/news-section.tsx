@@ -8,6 +8,7 @@ import { ChevronRight, Calendar, Clock, ArrowRight } from "lucide-react";
 import noticiasService, { type Noticia } from "@/services/noticias";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { safeImageUrl } from '@/lib/utils';
 
 export function NewsSection() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
@@ -100,7 +101,7 @@ export function NewsSection() {
               <div className="relative h-48 w-full overflow-hidden bg-gray-100">
                 {noticia.imagen ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_URL_IMAGES}${noticia.imagen.url}`}
+                    src={safeImageUrl(noticia.imagen.url)}
                     alt={noticia.nombre}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"

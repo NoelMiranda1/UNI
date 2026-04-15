@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Configuración base de Axios
 const axiosConfig: AxiosRequestConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://cmsuni-production.up.railway.app/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://uniapi.onmisales.software/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

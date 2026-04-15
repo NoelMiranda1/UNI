@@ -5,11 +5,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['cmsuni-production.up.railway.app'],
+    domains: ['uniapi.onmisales.software'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cmsuni-production.up.railway.app',
+        hostname: 'uniapi.onmisales.software',
         pathname: '/**',
       },
     ],
