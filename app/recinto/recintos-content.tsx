@@ -107,7 +107,7 @@ export function RecintosContent({ recintos }: RecintosContentProps) {
 
   const RecintoCard = ({ recinto }: { recinto: Recinto }) => {
     const tipo = getTipoRecinto(recinto.nombre);
-    const imageUrl = recintosService.getPrincipalImage(recinto.fotos);
+    const imageUrl = recintosService.getPrincipalImage(recinto.fotos || []);
     const isMain = recinto.id === recintoPrincipal?.id;
     
     return (
@@ -159,10 +159,10 @@ export function RecintosContent({ recintos }: RecintosContentProps) {
                 
                 {/* Quick Info */}
                 <div className="flex flex-wrap gap-3 text-sm text-white/90">
-                  {recinto.telefonos.length > 0 && (
+                  {(recinto.telefonos || []).length > 0 && (
                     <div className="flex items-center gap-1">
                       <Phone className="h-3 w-3" />
-                      <span>{recinto.telefonos[0].telefono}</span>
+                      <span>{(recinto.telefonos || [])[0]?.telefono}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">

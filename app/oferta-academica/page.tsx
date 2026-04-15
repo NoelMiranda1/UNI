@@ -5,8 +5,108 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, GraduationCap, BookOpen, Users, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { PageLoader } from '@/components/ui/page-loader';
-import areasConocimientoService, { type AreaConocimiento } from '@/services/areas-conocimiento';
+import areasConocimientoService, { type AreaConocimiento, type CarreraRelacionada } from '@/services/areas-conocimiento';
 import Link from 'next/link';
+
+const extractAreaDescription = (descripcion: any): string => {
+  if (!descripcion) return '';
+  if (typeof descripcion === 'string') return descripcion;
+  if (Array.isArray(descripcion)) {
+    return areasConocimientoService.extractPlainDescription(descripcion);
+  }
+  return '';
+};
+
+// Carreras reales de la UNI Nicaragua mapeadas por nombre de área
+const CARRERAS_POR_AREA: Record<string, Omit<CarreraRelacionada, 'id' | 'createdAt' | 'updatedAt'>[]> = {
+  'Ingeniería y Tecnología': [
+    {
+      nombre: 'Ingeniería Civil',
+      descripcion: [{ children: [{ text: 'Formación de profesionales capacitados para planificar, diseñar, construir y supervisar obras de infraestructura como edificios, puentes, carreteras, presas y sistemas de abastecimiento de agua. Disponible en RUPAP, RUACS (Estelí) y RURC (Juigalpa).' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Industrial',
+      descripcion: [{ children: [{ text: 'Profesionales con capacidad para optimizar procesos productivos, gestionar sistemas de calidad, administrar recursos humanos y materiales, e implementar soluciones tecnológicas en la industria manufacturera y de servicios.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Mecánica',
+      descripcion: [{ children: [{ text: 'Formación en diseño, análisis y manufactura de sistemas mecánicos, máquinas térmicas, equipos industriales y automatización. Los egresados pueden desempeñarse en industrias de manufactura, energía y mantenimiento.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Electrónica',
+      descripcion: [{ children: [{ text: 'Carrera acreditada internacionalmente por ACAAI. Forma profesionales en diseño de circuitos, sistemas de control, telecomunicaciones, automatización industrial y desarrollo de sistemas embebidos.' }] }],
+      imagenes: [],
+      urlPerfilAcademico: 'https://www.uni.edu.ni',
+    },
+    {
+      nombre: 'Ingeniería Eléctrica',
+      descripcion: [{ children: [{ text: 'Formación en generación, transmisión, distribución y uso eficiente de la energía eléctrica. Incluye diseño de instalaciones eléctricas, sistemas de potencia y energías renovables.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería en Computación',
+      descripcion: [{ children: [{ text: 'Profesionales en diseño de hardware y software, arquitectura de computadoras, redes de comunicación, inteligencia artificial y desarrollo de soluciones tecnológicas innovadoras.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería en Telecomunicaciones',
+      descripcion: [{ children: [{ text: 'Formación en diseño e implementación de sistemas de comunicación, redes de datos, telefonía, comunicaciones inalámbricas y fibra óptica para la conectividad nacional e internacional.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería de Sistemas',
+      descripcion: [{ children: [{ text: 'Una de las carreras más demandadas. Forma profesionales en desarrollo de software, bases de datos, sistemas de información, gestión de proyectos TI y transformación digital. Disponible en RUPAP y RUACS (Estelí).' }] }],
+      imagenes: [],
+    },
+  ],
+  'Arquitectura y Diseño': [
+    {
+      nombre: 'Arquitectura',
+      descripcion: [{ children: [{ text: 'Una de las carreras más demandadas de la UNI. Forma profesionales capaces de diseñar, planificar y gestionar proyectos arquitectónicos y urbanísticos, con énfasis en sostenibilidad, patrimonio cultural y desarrollo urbano responsable.' }] }],
+      imagenes: [],
+    },
+  ],
+  'Agroindustria y Medio Ambiente': [
+    {
+      nombre: 'Ingeniería Agroindustrial',
+      descripcion: [{ children: [{ text: 'Formación en procesamiento, conservación y transformación de productos agropecuarios, gestión de calidad alimentaria, y desarrollo de agronegocios sostenibles. Disponible en RUPAP, RUACS (Estelí) y RURC (Juigalpa).' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Agrícola',
+      descripcion: [{ children: [{ text: 'Profesionales en mecanización agrícola, sistemas de riego, conservación de suelos, planificación de fincas y desarrollo rural sostenible. Integra tecnología al sector agropecuario nicaragüense.' }] }],
+      imagenes: [],
+    },
+  ],
+  'Ciencias Básicas y Aplicadas': [
+    {
+      nombre: 'Ingeniería Química',
+      descripcion: [{ children: [{ text: 'Carrera acreditada internacionalmente por ACAAI. Formación en procesos químicos industriales, biotecnología, tratamiento de aguas, industria farmacéutica y protección del medio ambiente.' }] }],
+      imagenes: [],
+      urlPerfilAcademico: 'https://www.uni.edu.ni',
+    },
+  ],
+};
+
+function enrichAreasWithCarreras(areas: AreaConocimiento[]): AreaConocimiento[] {
+  return areas.map(area => {
+    if (area.carrerasRelacionadas && area.carrerasRelacionadas.length > 0) return area;
+    const carreras = CARRERAS_POR_AREA[area.nombre];
+    if (!carreras) return { ...area, carrerasRelacionadas: [] };
+    return {
+      ...area,
+      carrerasRelacionadas: carreras.map((c, idx) => ({
+        ...c,
+        id: `${area.id}-carrera-${idx}`,
+        createdAt: area.createdAt,
+        updatedAt: area.updatedAt,
+      })),
+    };
+  });
+}
 
 export default function OfertaAcademica() {
   const [areasConocimiento, setAreasConocimiento] = useState<AreaConocimiento[]>([]);
@@ -27,7 +127,7 @@ export default function OfertaAcademica() {
         sort: 'nombre'
       });
       
-      setAreasConocimiento(response.docs);
+      setAreasConocimiento(enrichAreasWithCarreras(response.docs));
     } catch (err) {
       console.error('Error fetching areas de conocimiento:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido al cargar los datos');
@@ -167,7 +267,7 @@ export default function OfertaAcademica() {
                         {area.nombre}
                       </h3>
                       <p className="text-gray-600 mb-4 flex-1 line-clamp-3">
-                        {area.descripcion || 'Descubre los programas académicos disponibles en esta área de conocimiento.'}
+                        {extractAreaDescription(area.descripcion) || 'Descubre los programas académicos disponibles en esta área de conocimiento.'}
                       </p>
                       
                       {area.carrerasRelacionadas && area.carrerasRelacionadas.length > 0 && (

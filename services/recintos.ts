@@ -1,4 +1,5 @@
 import api from './api';
+import { safeImageUrl } from '@/lib/utils';
 
 export interface FotoRecinto {
   id: string;
@@ -93,7 +94,7 @@ class RecintosService {
 
   getImageUrl(foto: FotoRecinto | undefined): string | null {
     if (!foto?.url) return null;
-    return `${process.env.NEXT_PUBLIC_URL_IMAGES || 'https://uniapi.onmisales.software'}${foto.url}`;
+    return safeImageUrl(foto.url);
   }
 
   getPrincipalImage(fotos: ImagenRecinto[]): string | null {

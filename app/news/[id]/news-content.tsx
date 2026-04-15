@@ -20,6 +20,7 @@ import { PageLoader } from '@/components/ui/page-loader';
 import noticiasService, { type Noticia } from '@/services/noticias';
 import Link from 'next/link';
 import Image from 'next/image';
+import { safeImageUrl } from '@/lib/utils';
 
 interface NewsContentProps {
   id: string;

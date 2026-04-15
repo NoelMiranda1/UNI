@@ -40,8 +40,13 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
     );
   }
 
-  const principalImage = recintosService.getPrincipalImage(recinto.fotos);
-  const otherImages = recinto.fotos.filter(f => !f.principal);
+  const fotos = recinto.fotos || [];
+  const telefonos = recinto.telefonos || [];
+  const telefaxes = recinto.telefaxes || [];
+  const descripcion = recinto.descripcion || '';
+
+  const principalImage = recintosService.getPrincipalImage(fotos);
+  const otherImages = fotos.filter(f => !f.principal);
 
   const getTipoRecinto = (nombre: string) => {
     if (nombre.toLowerCase().includes('centro universitario')) return 'Centro Regional';
@@ -55,7 +60,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
     if (typeof window !== 'undefined' && navigator.share) {
       navigator.share({
         title: recinto.nombre,
-        text: recinto.descripcion,
+        text: descripcion,
         url: window.location.href,
       });
     } else if (typeof window !== 'undefined') {
@@ -131,7 +136,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                 </h2>
                 <div className="prose prose-lg max-w-none">
                   <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-                    {recinto.descripcion}
+                    {descripcion || 'Información del recinto próximamente disponible.'}
                   </p>
                 </div>
               </CardContent>
@@ -145,7 +150,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                   Programas Académicos
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {recinto.descripcion.toLowerCase().includes('civil') && (
+                  {descripcion.toLowerCase().includes('civil') && (
                     <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
                       <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-white" />
@@ -153,7 +158,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                       <span className="font-medium">Ingeniería Civil</span>
                     </div>
                   )}
-                  {recinto.descripcion.toLowerCase().includes('sistemas') && (
+                  {descripcion.toLowerCase().includes('sistemas') && (
                     <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg">
                       <div className="h-10 w-10 bg-purple-600 rounded-full flex items-center justify-center">
                         <Users className="h-5 w-5 text-white" />
@@ -161,7 +166,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                       <span className="font-medium">Ingeniería en Sistemas</span>
                     </div>
                   )}
-                  {recinto.descripcion.toLowerCase().includes('agroindustrial') && (
+                  {descripcion.toLowerCase().includes('agroindustrial') && (
                     <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
                       <div className="h-10 w-10 bg-green-600 rounded-full flex items-center justify-center">
                         <GraduationCap className="h-5 w-5 text-white" />
@@ -169,7 +174,7 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                       <span className="font-medium">Ingeniería Agroindustrial</span>
                     </div>
                   )}
-                  {recinto.descripcion.toLowerCase().includes('industrial') && (
+                  {descripcion.toLowerCase().includes('industrial') && (
                     <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
                       <div className="h-10 w-10 bg-orange-600 rounded-full flex items-center justify-center">
                         <Building2 className="h-5 w-5 text-white" />
@@ -220,11 +225,11 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                 
                 <div className="space-y-4">
                   {/* Teléfonos */}
-                  {recinto.telefonos.length > 0 && (
+                  {telefonos.length > 0 && (
                     <div>
                       <p className="font-medium text-sm text-gray-500 mb-2">Teléfonos</p>
                       <div className="space-y-2">
-                        {recinto.telefonos.map(tel => (
+                        {telefonos.map(tel => (
                           <a
                             key={tel.id}
                             href={`tel:${tel.telefono.replace(/\s/g, '')}`}
@@ -239,11 +244,11 @@ export function RecintoDetailContent({ recinto }: RecintoDetailContentProps) {
                   )}
 
                   {/* Fax */}
-                  {recinto.telefaxes.length > 0 && (
+                  {telefaxes.length > 0 && (
                     <div>
                       <p className="font-medium text-sm text-gray-500 mb-2">Fax</p>
                       <div className="space-y-2">
-                        {recinto.telefaxes.map(fax => (
+                        {telefaxes.map(fax => (
                           <div key={fax.id} className="flex items-center gap-2 text-gray-700">
                             <Printer className="h-4 w-4" />
                             <span>{fax.telefax}</span>

@@ -23,6 +23,96 @@ import { PageLoader } from '@/components/ui/page-loader';
 import areasConocimientoService, { type AreaConocimiento, type CarreraRelacionada } from '@/services/areas-conocimiento';
 import Link from 'next/link';
 import Image from 'next/image';
+import { safeImageUrl } from '@/lib/utils';
+
+// Carreras reales de la UNI Nicaragua
+const CARRERAS_POR_AREA: Record<string, Omit<CarreraRelacionada, 'id' | 'createdAt' | 'updatedAt'>[]> = {
+  'Ingeniería y Tecnología': [
+    {
+      nombre: 'Ingeniería Civil',
+      descripcion: [{ children: [{ text: 'Formación de profesionales capacitados para planificar, diseñar, construir y supervisar obras de infraestructura como edificios, puentes, carreteras, presas y sistemas de abastecimiento de agua. Disponible en RUPAP, RUACS (Estelí) y RURC (Juigalpa).' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Industrial',
+      descripcion: [{ children: [{ text: 'Profesionales con capacidad para optimizar procesos productivos, gestionar sistemas de calidad, administrar recursos humanos y materiales, e implementar soluciones tecnológicas en la industria manufacturera y de servicios.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Mecánica',
+      descripcion: [{ children: [{ text: 'Formación en diseño, análisis y manufactura de sistemas mecánicos, máquinas térmicas, equipos industriales y automatización. Los egresados pueden desempeñarse en industrias de manufactura, energía y mantenimiento.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Electrónica',
+      descripcion: [{ children: [{ text: 'Carrera acreditada internacionalmente por ACAAI. Forma profesionales en diseño de circuitos, sistemas de control, telecomunicaciones, automatización industrial y desarrollo de sistemas embebidos.' }] }],
+      imagenes: [],
+      urlPerfilAcademico: 'https://www.uni.edu.ni',
+    },
+    {
+      nombre: 'Ingeniería Eléctrica',
+      descripcion: [{ children: [{ text: 'Formación en generación, transmisión, distribución y uso eficiente de la energía eléctrica. Incluye diseño de instalaciones eléctricas, sistemas de potencia y energías renovables.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería en Computación',
+      descripcion: [{ children: [{ text: 'Profesionales en diseño de hardware y software, arquitectura de computadoras, redes de comunicación, inteligencia artificial y desarrollo de soluciones tecnológicas innovadoras.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería en Telecomunicaciones',
+      descripcion: [{ children: [{ text: 'Formación en diseño e implementación de sistemas de comunicación, redes de datos, telefonía, comunicaciones inalámbricas y fibra óptica para la conectividad nacional e internacional.' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería de Sistemas',
+      descripcion: [{ children: [{ text: 'Una de las carreras más demandadas. Forma profesionales en desarrollo de software, bases de datos, sistemas de información, gestión de proyectos TI y transformación digital. Disponible en RUPAP y RUACS (Estelí).' }] }],
+      imagenes: [],
+    },
+  ],
+  'Arquitectura y Diseño': [
+    {
+      nombre: 'Arquitectura',
+      descripcion: [{ children: [{ text: 'Una de las carreras más demandadas de la UNI. Forma profesionales capaces de diseñar, planificar y gestionar proyectos arquitectónicos y urbanísticos, con énfasis en sostenibilidad, patrimonio cultural y desarrollo urbano responsable.' }] }],
+      imagenes: [],
+    },
+  ],
+  'Agroindustria y Medio Ambiente': [
+    {
+      nombre: 'Ingeniería Agroindustrial',
+      descripcion: [{ children: [{ text: 'Formación en procesamiento, conservación y transformación de productos agropecuarios, gestión de calidad alimentaria, y desarrollo de agronegocios sostenibles. Disponible en RUPAP, RUACS (Estelí) y RURC (Juigalpa).' }] }],
+      imagenes: [],
+    },
+    {
+      nombre: 'Ingeniería Agrícola',
+      descripcion: [{ children: [{ text: 'Profesionales en mecanización agrícola, sistemas de riego, conservación de suelos, planificación de fincas y desarrollo rural sostenible. Integra tecnología al sector agropecuario nicaragüense.' }] }],
+      imagenes: [],
+    },
+  ],
+  'Ciencias Básicas y Aplicadas': [
+    {
+      nombre: 'Ingeniería Química',
+      descripcion: [{ children: [{ text: 'Carrera acreditada internacionalmente por ACAAI. Formación en procesos químicos industriales, biotecnología, tratamiento de aguas, industria farmacéutica y protección del medio ambiente.' }] }],
+      imagenes: [],
+      urlPerfilAcademico: 'https://www.uni.edu.ni',
+    },
+  ],
+};
+
+function enrichAreaWithCarreras(area: AreaConocimiento): AreaConocimiento {
+  if (area.carrerasRelacionadas && area.carrerasRelacionadas.length > 0) return area;
+  const carreras = CARRERAS_POR_AREA[area.nombre];
+  if (!carreras) return { ...area, carrerasRelacionadas: [] };
+  return {
+    ...area,
+    carrerasRelacionadas: carreras.map((c, idx) => ({
+      ...c,
+      id: `${area.id}-carrera-${idx}`,
+      createdAt: area.createdAt,
+      updatedAt: area.updatedAt,
+    })),
+  };
+}
 
 interface CareerContentProps {
   id: string;
@@ -46,31 +136,24 @@ export default function CareerContent({ id }: CareerContentProps) {
       setError(null);
       
       // Intentar obtener el área directamente por ID
+      let areaEncontrada: AreaConocimiento | undefined;
       try {
-        const areaEncontrada = await areasConocimientoService.getAreaById(areaId);
-        setArea(areaEncontrada);
-        
-        // Seleccionamos la primera carrera si existe
-        if (areaEncontrada.carrerasRelacionadas && areaEncontrada.carrerasRelacionadas.length > 0) {
-          setSelectedCarrera(areaEncontrada.carrerasRelacionadas[0]);
-        }
+        areaEncontrada = await areasConocimientoService.getAreaById(areaId);
       } catch (apiError) {
-        // Si el endpoint específico no funciona, intentar obtener todas las áreas
         console.log('Intentando obtener todas las áreas para encontrar el ID:', areaId);
         const response = await areasConocimientoService.getAreas({ limit: 100 });
-        
-        const areaEncontrada = response.docs.find(a => a.id === areaId);
-        
-        if (!areaEncontrada) {
-          throw new Error('Área no encontrada');
-        }
-        
-        setArea(areaEncontrada);
-        
-        // Seleccionamos la primera carrera si existe
-        if (areaEncontrada.carrerasRelacionadas && areaEncontrada.carrerasRelacionadas.length > 0) {
-          setSelectedCarrera(areaEncontrada.carrerasRelacionadas[0]);
-        }
+        areaEncontrada = response.docs.find(a => a.id === areaId);
+      }
+
+      if (!areaEncontrada) {
+        throw new Error('Área no encontrada');
+      }
+
+      const enriched = enrichAreaWithCarreras(areaEncontrada);
+      setArea(enriched);
+
+      if (enriched.carrerasRelacionadas.length > 0) {
+        setSelectedCarrera(enriched.carrerasRelacionadas[0]);
       }
     } catch (err) {
       console.error('Error fetching area detail:', err);

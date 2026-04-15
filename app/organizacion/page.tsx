@@ -42,8 +42,13 @@ export default function OrganizacionPage() {
       setLoading(true);
       const response = await fetchOrganizacion();
       if (response.docs.length > 0) {
-        setOrganizacion(response.docs[0]);
-        setSelectedDivision(response.docs[0].divisiones[0]?.id || '');
+        const org = response.docs[0];
+        org.divisiones = (org.divisiones || []).map(d => ({
+          ...d,
+          cargos: d.cargos || [],
+        }));
+        setOrganizacion(org);
+        setSelectedDivision(org.divisiones[0]?.id || '');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar la información');
@@ -70,7 +75,25 @@ export default function OrganizacionPage() {
     return <UserCircle className="h-6 w-6" />;
   };
 
+  const extractCargoDescription = (cargo: Cargo): string => {
+    if (cargo.descripcionPlano) return cargo.descripcionPlano;
+    if (cargo.descripcionCargo && Array.isArray(cargo.descripcionCargo)) {
+      let text = '';
+      for (const block of cargo.descripcionCargo) {
+        if (block.children) {
+          for (const child of block.children) {
+            if (child.text) text += child.text;
+          }
+        }
+        text += '\n';
+      }
+      return text.trim();
+    }
+    return '';
+  };
+
   const formatDescription = (descripcion: string) => {
+    if (!descripcion) return <p className="text-gray-500 italic">Sin descripción disponible.</p>;
     return descripcion.split('\n').map((paragraph, index) => {
       if (paragraph.trim().startsWith('1.') || paragraph.trim().match(/^\d+\./)) {
         return (
@@ -280,7 +303,7 @@ export default function OrganizacionPage() {
                           Funciones y Responsabilidades
                         </h3>
                         <div className="bg-gray-50 rounded-lg p-6">
-                          {formatDescription(selectedCargo.descripcionPlano)}
+                          {formatDescription(extractCargoDescription(selectedCargo))}
                         </div>
                       </div>
                     </CardContent>
