@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Removido output: 'export' para permitir SSR/ISR
+  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
